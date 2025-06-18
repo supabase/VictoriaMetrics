@@ -32,6 +32,15 @@ func getReservations(cfg *apiConfig) ([]Reservation, error) {
 	var rs []Reservation
 	pageToken := ""
 	instanceFilters := awsapi.GetFiltersQueryString(cfg.instanceFilters)
+
+	if cfg.maxResultsPerPage > 0 {
+		if len(instanceFilters) == 0 {
+			instanceFilters = fmt.Sprintf("MaxResults=%d", cfg.maxResultsPerPage)
+		} else {
+			instanceFilters += fmt.Sprintf("&MaxResults=%d", cfg.maxResultsPerPage)
+		}
+	}
+
 	for {
 		data, err := cfg.awsConfig.GetEC2APIResponse("DescribeInstances", instanceFilters, pageToken)
 		if err != nil {

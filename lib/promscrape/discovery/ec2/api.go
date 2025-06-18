@@ -8,10 +8,11 @@ import (
 )
 
 type apiConfig struct {
-	awsConfig       *awsapi.Config
-	instanceFilters []awsapi.Filter
-	azFilters       []awsapi.Filter
-	port            int
+	awsConfig         *awsapi.Config
+	instanceFilters   []awsapi.Filter
+	azFilters         []awsapi.Filter
+	port              int
+	maxResultsPerPage int
 
 	// A map from AZ name to AZ id.
 	azMap     map[string]string
@@ -42,10 +43,11 @@ func newAPIConfig(sdc *SDConfig) (*apiConfig, error) {
 		return nil, err
 	}
 	cfg := &apiConfig{
-		awsConfig:       awsCfg,
-		instanceFilters: sdc.InstanceFilters,
-		azFilters:       sdc.AZFilters,
-		port:            port,
+		awsConfig:         awsCfg,
+		instanceFilters:   sdc.InstanceFilters,
+		azFilters:         sdc.AZFilters,
+		port:              port,
+		maxResultsPerPage: sdc.MaxResultsPerPage,
 	}
 	return cfg, nil
 }
