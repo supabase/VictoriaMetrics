@@ -1,0 +1,37 @@
+name: Build and Copy 
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-copy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: |
+            PKG_TAG=1.119.0-ec2-pagination make package-vmagent-amd64
+
+      - name: Get image ID
+        id: image_id
+        run: |
+          IMAGE_ID=$(docker images --format "{{.ID}}" | head -n 1)
+          echo "image_id=$IMAGE_ID" >> $GITHUB_OUTPUT
+
+      - name: Create container
+        run: docker create --name temp_vmagent ${{ steps.image_id.outputs.image_id }}
+
+      - name: Copy /vmagent-prod from container
+        run: docker cp temp_vmagent:/vmagent-prod ./vmagent-prod
+
+      - name: Remove container
+        run: docker rm temp_vmagent
+
+      - name: List copied file
+        run: ls -l ./vmagent-prod
